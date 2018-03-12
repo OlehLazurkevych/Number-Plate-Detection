@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 
+#include "filters.h"
+
 using namespace cv;
 using namespace std;
 
@@ -19,19 +21,15 @@ int main(int argc, char** argv)
 	
 	String windowName = "Source image";
 	
-	Mat filter = (Mat_<double>(3, 3) << -1, 0, 1, -1, 0, 1, -1, 0, 1);
-	Mat edgeY;
-	Point anchor = Point(-1, -1); // Means center of filter matrics
-	int delta = 0; // A value to be added to each pixel during the convolution
-	int ddepth = -1; // The depth of dst. A negative value (such as -1) indicates that the depth is the same as the source.
-	
-	filter2D(image, edgeY, ddepth, filter, anchor, delta, BORDER_DEFAULT);
+	Mat* res = nullptr;
+	res = filter(image, verticalDetectionMat);
 	
 	namedWindow(windowName, CV_WINDOW_FREERATIO); // Create a window
-	imshow(windowName, edgeY); // Show our image inside the created window.
+	imshow(windowName, *res); // Show our image inside the created window.
 	resizeWindow(windowName, image.cols * 0.6, image.rows * 0.6);
 
 	waitKey(0);
+	delete res;
 	destroyWindow(windowName);
 	return 0;
 }

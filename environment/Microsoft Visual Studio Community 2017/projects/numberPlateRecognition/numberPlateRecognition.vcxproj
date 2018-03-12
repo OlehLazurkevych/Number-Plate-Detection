@@ -19,7 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\filters.cpp" />
     <ClCompile Include="..\..\..\..\src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\filters.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -65,24 +69,28 @@
     <Import Project="..\..\properties\defApp.props" />
     <Import Project="..\..\properties\defPrj.props" />
     <Import Project="..\..\properties\opencv.props" />
+    <Import Project="..\..\properties\defInclude.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\properties\defApp.props" />
     <Import Project="..\..\properties\defPrj.props" />
     <Import Project="..\..\properties\opencv.props" />
+    <Import Project="..\..\properties\defInclude.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\properties\defApp.props" />
     <Import Project="..\..\properties\defPrj.props" />
     <Import Project="..\..\properties\opencv.props" />
+    <Import Project="..\..\properties\defInclude.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\properties\defApp.props" />
     <Import Project="..\..\properties\defPrj.props" />
     <Import Project="..\..\properties\opencv.props" />
+    <Import Project="..\..\properties\defInclude.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
