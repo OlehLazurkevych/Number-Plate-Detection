@@ -1,12 +1,6 @@
-#include <opencv2/opencv.hpp>
-
-#include <iostream>
-#include <string>
-
-#include "filters.h"
-
-using namespace cv;
-using namespace std;
+#include "imgProcessing.h"
+#include "imgAnalysis.h"
+#include "imgRendering.h"
 
 int main(int argc, char** argv)
 {
@@ -14,22 +8,27 @@ int main(int argc, char** argv)
 	
 	if (image.empty())
 	{
-		cout << "Could not open or find the image" << endl;
+		cout << "<Error>  :  Could not open or find the image!" << endl;
 		system("pause");
 		return -1;
 	}
-	
-	String windowName = "Source image";
-	
-	Mat* res = nullptr;
-	res = filter(image, verticalDetectionMat);
-	
-	namedWindow(windowName, CV_WINDOW_FREERATIO); // Create a window
-	imshow(windowName, *res); // Show our image inside the created window.
-	resizeWindow(windowName, image.cols * 0.6, image.rows * 0.6);
 
+	double t = (double)getTickCount();
+	
+	Mat* res = imgFilter(image, verticalDetectionMat);
+	vector<int>* verticalProj = imgProjection(*res, false);
+	vector<int>* horizontalProj = imgProjection(*res, true);
+	
+	t = ((double)getTickCount() - t) / getTickFrequency();
+	cout << "Done in: " << t << " sec." << endl;
+
+	Window::Draw(*res);
+	Window::Draw(*verticalProj, false);
+	Window::Draw(*horizontalProj, true);
+	
 	waitKey(0);
 	delete res;
-	destroyWindow(windowName);
+	delete verticalProj;
+	delete horizontalProj;
 	return 0;
 }

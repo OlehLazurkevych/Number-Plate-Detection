@@ -19,11 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\filters.cpp" />
+    <ClCompile Include="..\..\..\..\src\imgAnalysis.cpp" />
+    <ClCompile Include="..\..\..\..\src\imgProcessing.cpp" />
+    <ClCompile Include="..\..\..\..\src\imgRendering.cpp" />
     <ClCompile Include="..\..\..\..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\include\filters.h" />
+    <ClInclude Include="..\..\..\..\include\imgAnalysis.h" />
+    <ClInclude Include="..\..\..\..\include\imgProcessing.h" />
+    <ClInclude Include="..\..\..\..\include\imgRendering.h" />
+    <ClInclude Include="..\..\..\..\include\openCV.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

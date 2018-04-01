@@ -36,3 +36,4 @@ bin/
 external/
 intermediate/
 .vs/
+.vscode/
