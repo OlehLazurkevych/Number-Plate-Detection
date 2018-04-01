@@ -1,6 +1,5 @@
-#include "imgProcessing.h"
-#include "imgAnalysis.h"
-#include "imgRendering.h"
+#include "openCV.h"
+#include "plateCropTool.h"
 
 int main(int argc, char** argv)
 {
@@ -15,20 +14,13 @@ int main(int argc, char** argv)
 
 	double t = (double)getTickCount();
 	
-	Mat* res = imgFilter(image, verticalDetectionMat);
-	vector<int>* verticalProj = imgProjection(*res, false);
-	vector<int>* horizontalProj = imgProjection(*res, true);
+	plateCropTool cropTool(image);
+
+	cropTool.firstPhase();
 	
 	t = ((double)getTickCount() - t) / getTickFrequency();
 	cout << "Done in: " << t << " sec." << endl;
 
-	Window::Draw(*res);
-	Window::Draw(*verticalProj, false);
-	Window::Draw(*horizontalProj, true);
-	
 	waitKey(0);
-	delete res;
-	delete verticalProj;
-	delete horizontalProj;
 	return 0;
 }

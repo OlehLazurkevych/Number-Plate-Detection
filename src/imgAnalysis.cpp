@@ -9,27 +9,18 @@ vector<int>* imgProjection(Mat & img, bool horizontal)
 	int nCols = img.cols;
 
 	vector<int>* projection = new vector<int>((horizontal) ? nCols : nRows);
-
-	/*if (img.isContinuous())
-	{
-		nCols *= nRows;
-		nRows = 1;
-	}*/
-
 	uchar* p;
-	double projVal;
 
 	if (horizontal)
 	{
 		for (int i = 0; i < nCols; ++i)
 		{
-			projVal = 0;
+			projection->at(i) = 0;
 			for (int j = 0; j < nRows; ++j)
 			{
 				p = img.ptr<uchar>(j);
-				projVal += p[i];
+				projection->at(i) += p[i];
 			}
-			projection->at(i) = projVal;
 		}
 	}
 	else
@@ -37,14 +28,50 @@ vector<int>* imgProjection(Mat & img, bool horizontal)
 		for (int i = 0; i < nRows; ++i)
 		{
 			p = img.ptr<uchar>(i);
-			projVal = 0;
+			projection->at(i) = 0;
 			for (int j = 0; j < nCols; ++j)
 			{
-				projVal += p[j];
+				projection->at(i) += p[j];
 			}
-			projection->at(i) = projVal;
 		}
 	}
 
 	return projection;
+}
+
+vector<int>* vecRankFilter(vector<int>& vec, int rankSize)
+{
+	vector<int>* result = new vector<int>(vec.size());
+	int step = rankSize / 2;
+	int backVal = 0;
+	int frontVal = 0;
+
+	/*for (int i = 0; i < step; i++)
+	{
+		result->at(i) = vec[i];
+	}*/
+	
+	for (int i = step; i < vec.size() - step; i++)
+	{
+		backVal = 0;
+		frontVal = 0;
+
+		for (int r = i; r >= i - step; r--)
+		{
+			backVal += vec[r];
+		}
+		for (int f = i + 1; f <= i + step; f++)
+		{
+			frontVal += vec[f];
+		}
+
+		result->at(i) = (backVal + frontVal) / rankSize;
+	}
+
+	/*for (int i = vec.size() - step; i < vec.size(); i++)
+	{
+		result->at(i) = vec[i];
+	}*/
+
+	return result;
 }
