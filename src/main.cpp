@@ -22,5 +22,6 @@ int main(int argc, char** argv)
 	cout << "Done in: " << t << " sec." << endl;
 
 	waitKey(0);
+	system("pause");
 	return 0;
 }

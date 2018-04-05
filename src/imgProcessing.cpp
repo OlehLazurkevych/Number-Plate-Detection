@@ -13,3 +13,21 @@ Mat* imgFilter(const Mat& img, const Mat& filterMat)
 	
     return result;
 }
+
+Mat * imgCrop(const int x, const int y, const int width, const int height, Mat& img)
+{
+	Mat* result = new Mat(height, width, CV_8UC1);
+	uchar *in, *out;
+
+	for (int i = y, iout = 0; i < y + height; i++, iout++)
+	{
+		in = img.ptr<uchar>(i);
+		out = result->ptr<uchar>(iout);
+		for (int j = x, jout = 0; j < x + width; j++, jout++)
+		{
+			out[jout] = in[j];
+		}
+	}
+
+	return result;
+}
