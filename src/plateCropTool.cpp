@@ -2,55 +2,60 @@
 
 plateCropTool::plateCropTool(Mat& image) : mSource(image)
 {
-	mPotentialPlates = new pair<int, int>[POTENTIAL_PLATES_QUANTITY];
+	mPotentialPlates = new Mat*[POTENTIAL_PLATES_QUANTITY];
 }
 
 plateCropTool::~plateCropTool()
 {
 	if (mPotentialPlates)
 	{
+		for (int i = 0; i < POTENTIAL_PLATES_QUANTITY; i++)
+		{
+			if (mPotentialPlates[i])
+			{
+				delete mPotentialPlates[i];
+			}
+		}
 		delete[] mPotentialPlates;
-	}
-	if (mVerticalProj)
-	{
-		delete mVerticalProj;
 	}
 }
 
 void plateCropTool::firstPhase()
 {
 	Mat* filtered = imgFilter(mSource, verticalDetectionMat);
-	vector<int>* rVertProj = imgProjection(*filtered, false);
-
-	mVerticalProj = vecRankFilter(*rVertProj, RANK_SIZE);
+	vector<int>* roughtVerticalProj = imgProjection(*filtered, false);
+	vector<int>* verticalProj = vecRankFilter(*roughtVerticalProj, VERTICAL_RANK_SIZE);
+	pair<int, int> clipBoundaries;
 
 	for (int i = 0; i < POTENTIAL_PLATES_QUANTITY; i++)
 	{
-		mPotentialPlates[i] = findVertClip(mVerticalProj);
-		fill(mVerticalProj->begin() + mPotentialPlates[i].first, mVerticalProj->begin() + mPotentialPlates[i].second, 0);
+		clipBoundaries = findPeekFoot(verticalProj, FIRST_PHASE_COEF);
+		mPotentialPlates[i] = imgCrop(0, clipBoundaries.first, mSource.cols, clipBoundaries.second - clipBoundaries.first, mSource);
+		fill(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second, 0);
 	}
 
 	delete filtered;
-	delete rVertProj;
+	delete roughtVerticalProj;
+	delete verticalProj;
 }
 
-pair<int, int> plateCropTool::findVertClip(vector<int>* verticalProj)
+pair<int, int> plateCropTool::findPeekFoot(vector<int>* projection, const double coefficient)
 {
 	pair<int, int> result;
-	auto highest = max_element(verticalProj->begin(), verticalProj->end());
+	auto highest = max_element(projection->begin(), projection->end());
 
-	for (int i = distance(verticalProj->begin(), highest); i >= 0; i--)
+	for (int i = distance(projection->begin(), highest); i >= 0; i--)
 	{
-		if (verticalProj->at(i) < (*highest) * FIRST_PHASE_COEF)
+		if (projection->at(i) < (*highest) * coefficient)
 		{
 			break;
 		}
 		result.first = i;
 	}
 
-	for (int i = distance(verticalProj->begin(), highest); i < verticalProj->size(); i++)
+	for (int i = distance(projection->begin(), highest); i < projection->size(); i++)
 	{
-		if (verticalProj->at(i) < (*highest) * FIRST_PHASE_COEF)
+		if (projection->at(i) < (*highest) * coefficient)
 		{
 			break;
 		}
