@@ -46,11 +46,6 @@ vector<int>* vecRankFilter(vector<int>& vec, int rankSize)
 	int backVal = 0;
 	int frontVal = 0;
 
-	/*for (int i = 0; i < step; i++)
-	{
-		result->at(i) = vec[i];
-	}*/
-	
 	for (int i = step; i < vec.size() - step; i++)
 	{
 		backVal = 0;
@@ -60,6 +55,7 @@ vector<int>* vecRankFilter(vector<int>& vec, int rankSize)
 		{
 			backVal += vec[r];
 		}
+
 		for (int f = i + 1; f <= i + step; f++)
 		{
 			frontVal += vec[f];
@@ -67,11 +63,6 @@ vector<int>* vecRankFilter(vector<int>& vec, int rankSize)
 
 		result->at(i) = (backVal + frontVal) / rankSize;
 	}
-
-	/*for (int i = vec.size() - step; i < vec.size(); i++)
-	{
-		result->at(i) = vec[i];
-	}*/
 
 	return result;
 }

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <numeric>
 
 using namespace cv;
 using namespace std;

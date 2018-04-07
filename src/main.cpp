@@ -14,16 +14,18 @@ int main(int argc, char** argv)
 
 	double t = (double)getTickCount();
 	
-	plateCropTool cropTool(image);
-
+	PlateCropTool cropTool(image);
+	
 	cropTool.firstPhase();
+	cropTool.secoundPhase();
+	cropTool.thirdPhase();
 
 	t = ((double)getTickCount() - t) / getTickFrequency();
 	cout << "Done in: " << t << " sec." << endl;
 
 	for (int i = 0; i < 3; i++)
 	{
-		Window::Draw(*cropTool.mPotentialPlates[i]);
+		Window::Draw(*cropTool.mPotentialPlates[i].mPlate);
 	}
 
 	waitKey(0);
