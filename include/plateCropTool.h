@@ -25,16 +25,16 @@ public:
 		~PotentialPlate();
 
 	public:
-		double getOveralCost();
+		double getOveralCost(); // This cost is used to compare all potential plates with each other
 
-		void setHeightHeuristics(double value);
-		void setPeakHeuristics(vector<int>& data);
-		void setAreaHeuristics(vector<int>& data);
-		void setRatioHeuristics(double width, double height);
+		void setHeightHeuristics(const double value);
+		void setPeakHeuristics(const vector<int>& data);
+		void setAreaHeuristics(const vector<int>& data);
+		void setRatioHeuristics(const double width, const double height);
 	};
 
 public:
-	Mat& mSource;
+	Mat* mSource;
 	PotentialPlate* mPotentialPlates;
 
 private:
@@ -45,18 +45,24 @@ private:
 
 	const double VERTICAL_CLIP_COEF   = 0.55;
 	const double HORIZONTAL_CLIP_COEF = 0.33;
-	const double THIRD_PHASE_COEF     = 0.42;
+	const double FIRST_PEAK_COEF      = 0.42;
 	const double HORIZONTAL_RANK_COEF = 3.2;
 
 public:
-	PlateCropTool(Mat& image);
+	PlateCropTool();
 	~PlateCropTool();
 
 public:
+	Mat* getPlate(Mat& image);
+
+private:
 	void firstPhase();
 	void secoundPhase();
 	void thirdPhase();
+	int choosePlateIndex();
 
 private:
-	pair<int, int> findPeakFoot(vector<int>* projection, const double coefficient);
+	pair<int, int> findPeakFoot(const vector<int>& projection, const double coefficient);
+	vector<int>* findDerivative(const vector<int>& projection);
+	int findFirstPeak(const vector<int>& projection, const double coefficient, const bool fromStart, const bool positive);
 };
