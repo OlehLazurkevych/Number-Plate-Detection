@@ -64,15 +64,5 @@ vector<int>* vecRankFilter(vector<int>& vec, int rankSize)
 		result->at(i) = (backVal + frontVal) / rankSize;
 	}
 
-	for (int i = 0; i < step; i++)
-	{
-		result->at(i) = result->at(step);
-	}
-
-	for (int i = vec.size() - step; i < vec.size(); i++)
-	{
-		result->at(i) = result->at(vec.size() - step - 1);
-	}
-
 	return result;
 }

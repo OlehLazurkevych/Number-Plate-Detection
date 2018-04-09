@@ -41,3 +41,25 @@ Mat * imgCrop(const int x, const int y, const int width, const int height, Mat& 
 
 	return result;
 }
+
+Mat* imgGetGray(Mat& img)
+{
+	Mat* result = new Mat(img.rows, img.cols, CV_8UC1);
+	uchar* in, *out;
+	uchar coef = 100;
+
+	for (int i = 0; i < img.rows; i++)
+	{
+		in = img.ptr<uchar>(i);
+		out = result->ptr<uchar>(i);
+
+		for (int jin = 1, jout = 0; jout < result->cols; jout++)
+		{
+			out[jout] = (in[jin - 1] + in[jin] + abs( in[jin + 1] - 70)) / 3;
+
+			jin += 3;
+		}
+	}
+
+	return result;
+}
