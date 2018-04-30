@@ -24,6 +24,7 @@
     <ClCompile Include="..\..\..\..\src\imgRendering.cpp" />
     <ClCompile Include="..\..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\..\src\plateCropTool.cpp" />
+    <ClCompile Include="..\..\..\..\src\segmentationTool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\imgAnalysis.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="..\..\..\..\include\imgRendering.h" />
     <ClInclude Include="..\..\..\..\include\openCV.h" />
     <ClInclude Include="..\..\..\..\include\plateCropTool.h" />
+    <ClInclude Include="..\..\..\..\include\segmentationTool.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

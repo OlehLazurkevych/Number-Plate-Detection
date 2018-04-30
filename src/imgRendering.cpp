@@ -6,7 +6,9 @@ void Window::Draw(Mat& img, int width, int height)
 {
 	if (img.cols != 0 && img.rows != 0)
 	{
-		string windowName = "Step #" + mCounter;
+		stringstream nameStream;
+		nameStream << "Step #" << mCounter << " (" << img.cols << " x " << img.rows << ")";
+		string windowName = nameStream.str();
 		++mCounter[0];
 
 		namedWindow(windowName, CV_WINDOW_FREERATIO); // Create a window

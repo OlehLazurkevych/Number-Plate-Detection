@@ -1,9 +1,10 @@
 #include "openCV.h"
 #include "plateCropTool.h"
+#include "segmentationTool.h"
 
 int main(int argc, char** argv)
 {
-	Mat image = imread("E:/Projects/Number-Plate-Recognition/data/photo-of-cars/ez-5.jpg");
+	Mat image = imread("E:/Projects/Number-Plate-Recognition/data/photo-of-cars/1.jpg");
 
 	if (image.empty())
 	{
@@ -11,25 +12,38 @@ int main(int argc, char** argv)
 		system("pause");
 		return -1;
 	}
+	
+	Mat* croppedPlate;
+	vector<Mat> segments;
 
-	Mat* res;
-
-	double t = (double)getTickCount();
+	double t = (double)getTickCount();//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 	
 	PlateCropTool cropTool;
+	SegmentationTool segmentationTool;
 
 	image = *imgGetGray(image);
-	res = cropTool.getPlate(image);
+	croppedPlate = cropTool.getPlate(image);
+	segments = segmentationTool.getSegments(*croppedPlate);
+	if (segments.size() == 0)
+	{
+		cout << "Plate not found" << endl;
+	}
 
-	t = ((double)getTickCount() - t) / getTickFrequency();
-	cout << "Done in: " << t << " sec." << endl;
+	t = ((double)getTickCount() - t) / getTickFrequency();//|||||||||||||||||||||||||||||||||||||||||||||
+	cout << endl << "Done in: " << t << " sec." << endl;
 	
-	Window::Draw(*res);
-	Window::Draw(image);
+	Window::Draw(*croppedPlate);
 
-	Window::Draw(*cropTool.mPotentialPlates[0].mPlate);
-	Window::Draw(*cropTool.mPotentialPlates[1].mPlate);
-	Window::Draw(*cropTool.mPotentialPlates[2].mPlate);
+	for (int i = 0; i < segments.size(); i++)
+	{
+		Window::Draw(segments[i]);
+	}
+
+	//Window::Draw(image);
+
+	//Window::Draw(*cropTool.mPotentialPlates[0].mPlate);
+	//Window::Draw(*cropTool.mPotentialPlates[1].mPlate);
+	//Window::Draw(*cropTool.mPotentialPlates[2].mPlate);
 
 	waitKey(0);
 	system("pause");

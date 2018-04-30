@@ -13,3 +13,4 @@ const Mat horizontalDetectionMat = (Mat_<int>(3, 3) <<
 Mat* imgFilter(const Mat& img, const Mat& filterMat);
 Mat* imgCrop(const int x, const int y, const int width, const int height, Mat& img);
 Mat* imgGetGray(Mat& img);
+Mat* imgLocalThresh(Mat& img, const int xSegments, const int ySegments);
