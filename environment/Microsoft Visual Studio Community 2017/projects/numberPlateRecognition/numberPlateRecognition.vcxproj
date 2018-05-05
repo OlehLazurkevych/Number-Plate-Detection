@@ -19,17 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\charRecognitionTool.cpp" />
     <ClCompile Include="..\..\..\..\src\imgAnalysis.cpp" />
     <ClCompile Include="..\..\..\..\src\imgProcessing.cpp" />
     <ClCompile Include="..\..\..\..\src\imgRendering.cpp" />
     <ClCompile Include="..\..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\..\src\numberPlateRecognitionTool.cpp" />
     <ClCompile Include="..\..\..\..\src\plateCropTool.cpp" />
     <ClCompile Include="..\..\..\..\src\segmentationTool.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\charRecognitionTool.h" />
     <ClInclude Include="..\..\..\..\include\imgAnalysis.h" />
     <ClInclude Include="..\..\..\..\include\imgProcessing.h" />
     <ClInclude Include="..\..\..\..\include\imgRendering.h" />
+    <ClInclude Include="..\..\..\..\include\numberPlateRecognitionTool.h" />
     <ClInclude Include="..\..\..\..\include\openCV.h" />
     <ClInclude Include="..\..\..\..\include\plateCropTool.h" />
     <ClInclude Include="..\..\..\..\include\segmentationTool.h" />

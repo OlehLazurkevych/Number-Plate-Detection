@@ -9,6 +9,7 @@
 #include <stack>
 #include <list>
 #include <numeric>
+#include <exception>
 
 using namespace cv;
 using namespace std;

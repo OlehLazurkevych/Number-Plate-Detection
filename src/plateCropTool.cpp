@@ -42,15 +42,22 @@ void PlateCropTool::firstPhase()
 	{
 		clipBoundaries = findPeakFoot(*verticalProj, VERTICAL_CLIP_COEF);
 
-		mPotentialPlates[i].mPlate = imgCrop(0, clipBoundaries.first, mSource->cols, clipBoundaries.second - clipBoundaries.first, *mSource);
-		mPotentialPlates[i].setHeightHeuristics(clipBoundaries.second - clipBoundaries.first);
+		if (clipBoundaries.first < clipBoundaries.second)
+		{
+			mPotentialPlates[i].mPlate = imgCrop(0, clipBoundaries.first, mSource->cols, clipBoundaries.second - clipBoundaries.first, *mSource);
+			mPotentialPlates[i].setHeightHeuristics(clipBoundaries.second - clipBoundaries.first);
 
-		vector<int>* subProjection = new vector<int>(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second);
-		mPotentialPlates[i].setPeakHeuristics(*subProjection);
-		mPotentialPlates[i].setAreaHeuristics(*subProjection);
-		delete subProjection;
+			vector<int>* subProjection = new vector<int>(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second);
+			mPotentialPlates[i].setPeakHeuristics(*subProjection);
+			mPotentialPlates[i].setAreaHeuristics(*subProjection);
+			delete subProjection;
 
-		fill(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second, 0);
+			fill(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second, 0);
+		}
+		else
+		{
+			mPotentialPlates[i].mPlate = nullptr;
+		}
 	}
 
 	delete filtered;
@@ -73,37 +80,40 @@ void PlateCropTool::secoundPhase()
 
 	for (int i = 0; i < VERTICAL_PEAK_QUANTITY; i++)
 	{
-		filtered = imgFilter(*mPotentialPlates[i].mPlate, horizontalDetectionMat);
-		roughtHorizontalProj = imgProjection(*filtered, true);
-		horizontalProj = vecRankFilter(*roughtHorizontalProj, mPotentialPlates[i].mPlate->rows * HORIZONTAL_RANK_COEF);
-
-		clipBndrIndx = 0;
-		curBndr = 0;
-		maxBndr = 0;
-		
-		for (int j = 0; j < HORIZONTAL_PEAK_QUANTITY; j++)
+		if (mPotentialPlates[i].mPlate != nullptr)
 		{
-			clipBoundaries[j] = findPeakFoot(*horizontalProj, HORIZONTAL_CLIP_COEF);
-			fill(horizontalProj->begin() + clipBoundaries[j].first, horizontalProj->begin() + clipBoundaries[j].second, 0);
+			filtered = imgFilter(*mPotentialPlates[i].mPlate, horizontalDetectionMat);
+			roughtHorizontalProj = imgProjection(*filtered, true);
+			horizontalProj = vecRankFilter(*roughtHorizontalProj, mPotentialPlates[i].mPlate->rows * HORIZONTAL_RANK_COEF);
 
-			curBndr = clipBoundaries[j].second - clipBoundaries[j].first;
-			if (curBndr > maxBndr)
+			clipBndrIndx = 0;
+			curBndr = 0;
+			maxBndr = 0;
+
+			for (int j = 0; j < HORIZONTAL_PEAK_QUANTITY; j++)
 			{
-				maxBndr = curBndr;
-				clipBndrIndx = j;
+				clipBoundaries[j] = findPeakFoot(*horizontalProj, HORIZONTAL_CLIP_COEF);
+				fill(horizontalProj->begin() + clipBoundaries[j].first, horizontalProj->begin() + clipBoundaries[j].second, 0);
+
+				curBndr = clipBoundaries[j].second - clipBoundaries[j].first;
+				if (curBndr > maxBndr)
+				{
+					maxBndr = curBndr;
+					clipBndrIndx = j;
+				}
 			}
-		}
 
-		inswapping = imgCrop(clipBoundaries[clipBndrIndx].first, 0, clipBoundaries[clipBndrIndx].second - clipBoundaries[clipBndrIndx].first, mPotentialPlates[i].mPlate->rows, *mPotentialPlates[i].mPlate);
-		if (inswapping)
-		{
-			delete mPotentialPlates[i].mPlate;
-			mPotentialPlates[i].mPlate = inswapping;
-		}
+			inswapping = imgCrop(clipBoundaries[clipBndrIndx].first, 0, clipBoundaries[clipBndrIndx].second - clipBoundaries[clipBndrIndx].first, mPotentialPlates[i].mPlate->rows, *mPotentialPlates[i].mPlate);
+			if (inswapping)
+			{
+				delete mPotentialPlates[i].mPlate;
+				mPotentialPlates[i].mPlate = inswapping;
+			}
 
-		delete filtered;
-		delete roughtHorizontalProj;
-		delete horizontalProj;
+			delete filtered;
+			delete roughtHorizontalProj;
+			delete horizontalProj;
+		}
 	}
 	delete[] clipBoundaries;
 }
@@ -120,25 +130,28 @@ void PlateCropTool::thirdPhase()
 
 	for (int i = 0; i < VERTICAL_PEAK_QUANTITY; i++)
 	{
-		horizontalProj = imgProjection(*mPotentialPlates[i].mPlate, true);
-		deriviateProj = findDerivative(*horizontalProj);
+		if (mPotentialPlates[i].mPlate != nullptr)
+		{
+			horizontalProj = imgProjection(*mPotentialPlates[i].mPlate, true);
+			deriviateProj = findDerivative(*horizontalProj);
 
-		firstHalf = new vector<int>(deriviateProj->begin(), deriviateProj->begin() + (deriviateProj->size() / 2));
-		secoundHalf = new vector<int>(deriviateProj->begin() + (deriviateProj->size() / 2), deriviateProj->end());
+			firstHalf = new vector<int>(deriviateProj->begin(), deriviateProj->begin() + (deriviateProj->size() / 2));
+			secoundHalf = new vector<int>(deriviateProj->begin() + (deriviateProj->size() / 2), deriviateProj->end());
 
-		clipBoundaries.first = findFirstPeak(*firstHalf, FIRST_PEAK_COEF, true, true);
-		clipBoundaries.second = (deriviateProj->size() / 2) + findFirstPeak(*secoundHalf, FIRST_PEAK_COEF, false, false);
+			clipBoundaries.first = findFirstPeak(*firstHalf, FIRST_PEAK_COEF, true, true);
+			clipBoundaries.second = (deriviateProj->size() / 2) + findFirstPeak(*secoundHalf, FIRST_PEAK_COEF, false, false);
 
-		mPotentialPlates[i].setRatioHeuristics(clipBoundaries.second - clipBoundaries.first, mPotentialPlates[i].mPlate->rows);
+			mPotentialPlates[i].setRatioHeuristics(clipBoundaries.second - clipBoundaries.first, mPotentialPlates[i].mPlate->rows);
 
-		inswapping = imgCrop(clipBoundaries.first, 0, clipBoundaries.second - clipBoundaries.first, mPotentialPlates[i].mPlate->rows, *mPotentialPlates[i].mPlate);
-		delete mPotentialPlates[i].mPlate;
-		mPotentialPlates[i].mPlate = inswapping;
+			inswapping = imgCrop(clipBoundaries.first, 0, clipBoundaries.second - clipBoundaries.first, mPotentialPlates[i].mPlate->rows, *mPotentialPlates[i].mPlate);
+			delete mPotentialPlates[i].mPlate;
+			mPotentialPlates[i].mPlate = inswapping;
 
-		delete firstHalf;
-		delete secoundHalf;
-		delete horizontalProj;
-		delete deriviateProj;
+			delete firstHalf;
+			delete secoundHalf;
+			delete horizontalProj;
+			delete deriviateProj;
+		}
 	}
 }
 
@@ -149,10 +162,13 @@ int PlateCropTool::choosePlateIndex()
 
 	for (int i = 1; i < VERTICAL_PEAK_QUANTITY; i++)
 	{
-		if (mPotentialPlates[i].getOveralCost() < min)
+		if (mPotentialPlates[i].mPlate != nullptr)
 		{
-			min = mPotentialPlates[i].getOveralCost();
-			index = i;
+			if (mPotentialPlates[i].getOveralCost() < min)
+			{
+				min = mPotentialPlates[i].getOveralCost();
+				index = i;
+			}
 		}
 	}
 
