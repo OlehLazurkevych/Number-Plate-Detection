@@ -41,9 +41,11 @@ void NumberPlateRecognitionTool::tryRecognize(Mat& image)
 	mSource = imgGetGray(image);
 	mCroppedPlate = mPCT->getPlate(*mSource);
 	segments = mST->getSegments(*mCroppedPlate);
+
 	try
 	{
 		mCRT->init(segments);
+		mCRT->next();
 	}
 	catch (exception e)
 	{

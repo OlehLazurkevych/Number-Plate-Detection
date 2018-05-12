@@ -42,4 +42,8 @@ public:
 	void drawAll();
 
 	int getCharsQuantity() const;
+
+private:
+	char recognizeChar(Mat& segment, bool isNumber);
+	void skeletonize(Mat& segment);
 };

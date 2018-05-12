@@ -153,6 +153,14 @@ void CharRecognitionTool::init(vector<Mat> segments)
 
 char CharRecognitionTool::next()
 {
+	for (int i = 0; i < mChars.size(); i++)
+	{
+		for (int j = 0; j < mChars[i].size(); j++)
+		{
+			skeletonize(mChars[i][j].mSegment);
+		}
+	}
+
 	return 0;
 }
 
@@ -194,6 +202,105 @@ void CharRecognitionTool::drawAll()
 int CharRecognitionTool::getCharsQuantity() const
 {
 	return mCharsQuantity;
+}
+
+char CharRecognitionTool::recognizeChar(Mat & segment, bool isNumber)
+{
+	return 0;
+}
+
+void CharRecognitionTool::skeletonize(Mat & segment)
+{
+	const uchar BGCOLOR = 255;
+	const uchar CHCOLOR = 0;
+	const uchar MARKER = 100;
+
+	const vector<Point> neighbourhood8Pos = vector<Point>{
+		Point(0, -1),  /*  Top            */
+		Point(1, -1),  /*  Top Right      */
+		Point(1, 0),   /*  Right          */
+		Point(1, 1),   /*  Bottom Right   */
+		Point(0, 1),   /*  Bottom         */
+		Point(-1, 1),  /*  Bottom Left    */
+		Point(-1, 0),  /*  Left           */
+		Point(-1, -1)  /*  Top Left       */
+	};
+	vector<bool> neighbourhood8Vals;
+	Point curr;
+
+	int blackQuantity = 0;
+
+	bool iterate = true;
+	bool highlightThis = false;
+
+	while (iterate)
+	{
+		iterate = false;
+
+		for (int y = 0; y < segment.rows; y++)
+		{
+			for (int x = 0; x < segment.cols; x++)
+			{
+				if (segment.at<uchar>(Point(x, y)) == CHCOLOR)
+				{
+					neighbourhood8Vals = vector<bool>{ true, true, true, true, true, true, true, true }; // True means white pixel
+					highlightThis = false;
+					blackQuantity = 0;
+
+					for (int i = 0; i < neighbourhood8Pos.size(); i++)
+					{
+						curr = Point(x + neighbourhood8Pos[i].x, y + neighbourhood8Pos[i].y);
+						if (curr.x >= 0 && curr.x < segment.cols && curr.y >= 0 && curr.y < segment.rows)
+						{
+							if (segment.at<uchar>(curr) != BGCOLOR)
+							{
+								neighbourhood8Vals[i] = false;
+								++blackQuantity;
+							}
+						}
+					}
+
+					if (neighbourhood8Vals[0] || neighbourhood8Vals[2] || neighbourhood8Vals[4])
+					{
+						if (neighbourhood8Vals[2] || neighbourhood8Vals[4] || neighbourhood8Vals[6])
+						{
+							if (blackQuantity >= 2 && blackQuantity <= 6)
+							{
+								int q = 0;
+								for (int i = 0; i < neighbourhood8Vals.size() - 1; i++)
+								{
+									if (!neighbourhood8Vals[i] && neighbourhood8Vals[i + 1])
+									{
+										++q;
+									}
+								}
+								if (!neighbourhood8Vals[neighbourhood8Vals.size() - 1] && neighbourhood8Vals[0])
+								{
+									++q;
+								}
+								if (q == 1)
+								{
+									segment.at<uchar>(Point(x, y)) = MARKER;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		for (int y = 0; y < segment.rows; y++)
+		{
+			for (int x = 0; x < segment.cols; x++)
+			{
+				if (segment.at<uchar>(Point(x, y)) == MARKER)
+				{
+					segment.at<uchar>(Point(x, y)) = BGCOLOR;
+					iterate = true;
+				}
+			}
+		}
+	}
 }
 
 CharRecognitionTool::Segment::Segment() :
