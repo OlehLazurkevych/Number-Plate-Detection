@@ -50,7 +50,10 @@ void PlateCropTool::firstPhase()
 			vector<int>* subProjection = new vector<int>(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second);
 			mPotentialPlates[i].setPeakHeuristics(*subProjection);
 			mPotentialPlates[i].setAreaHeuristics(*subProjection);
-			delete subProjection;
+			if (subProjection)
+			{
+				delete subProjection;
+			}
 
 			fill(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second, 0);
 		}
@@ -60,9 +63,18 @@ void PlateCropTool::firstPhase()
 		}
 	}
 
-	delete filtered;
-	delete roughtVerticalProj;
-	delete verticalProj;
+	if (filtered)
+	{
+		delete filtered;
+	}
+	if (roughtVerticalProj)
+	{
+		delete roughtVerticalProj;
+	}
+	if (verticalProj)
+	{
+		delete verticalProj;
+	}
 }
 
 void PlateCropTool::secoundPhase()
@@ -106,16 +118,31 @@ void PlateCropTool::secoundPhase()
 			inswapping = imgCrop(clipBoundaries[clipBndrIndx].first, 0, clipBoundaries[clipBndrIndx].second - clipBoundaries[clipBndrIndx].first, mPotentialPlates[i].mPlate->rows, *mPotentialPlates[i].mPlate);
 			if (inswapping)
 			{
-				delete mPotentialPlates[i].mPlate;
+				if (mPotentialPlates[i].mPlate)
+				{
+					delete mPotentialPlates[i].mPlate;
+				}
 				mPotentialPlates[i].mPlate = inswapping;
 			}
-
-			delete filtered;
-			delete roughtHorizontalProj;
-			delete horizontalProj;
+			
+			if (filtered)
+			{
+				delete filtered;
+			}
+			if (roughtHorizontalProj)
+			{
+				delete roughtHorizontalProj;
+			}
+			if (horizontalProj)
+			{
+				delete horizontalProj;
+			}
 		}
 	}
-	delete[] clipBoundaries;
+	if (clipBoundaries)
+	{
+		delete[] clipBoundaries;
+	}
 }
 
 void PlateCropTool::thirdPhase()
@@ -144,13 +171,28 @@ void PlateCropTool::thirdPhase()
 			mPotentialPlates[i].setRatioHeuristics(clipBoundaries.second - clipBoundaries.first, mPotentialPlates[i].mPlate->rows);
 
 			inswapping = imgCrop(clipBoundaries.first, 0, clipBoundaries.second - clipBoundaries.first, mPotentialPlates[i].mPlate->rows, *mPotentialPlates[i].mPlate);
-			delete mPotentialPlates[i].mPlate;
+			if (mPotentialPlates[i].mPlate)
+			{
+				delete mPotentialPlates[i].mPlate;
+			}
 			mPotentialPlates[i].mPlate = inswapping;
 
-			delete firstHalf;
-			delete secoundHalf;
-			delete horizontalProj;
-			delete deriviateProj;
+			if (firstHalf)
+			{
+				delete firstHalf;
+			}
+			if (secoundHalf)
+			{
+				delete secoundHalf;
+			}
+			if (horizontalProj)
+			{
+				delete horizontalProj;
+			}
+			if (deriviateProj)
+			{
+				delete deriviateProj;
+			}
 		}
 	}
 }

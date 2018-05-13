@@ -27,6 +27,8 @@ void SegmentationTool::cutSegments(Mat& image)
 				curr = extractParticle(*source, x, y);
 				if (!curr.empty())
 				{
+					// TODO: when angeling
+					// cut image by height of particles
 					if (curr.rows * 2.4 > source->rows)
 					{
 						if (curr.cols > curr.rows)
@@ -43,7 +45,10 @@ void SegmentationTool::cutSegments(Mat& image)
 		}
 	}
 
-	delete source;
+	if (source)
+	{
+		delete source;
+	}
 }
 
 Mat SegmentationTool::extractParticle(Mat& segment, const int seedX, const int seedY)

@@ -17,6 +17,23 @@ void CharRecognitionTool::init(vector<Mat> segments)
 	mCurrChar = 0;
 	mCharsQuantity = 0;
 
+	if (segments.size() > DES_SEG_QUANTITY)
+	{
+		vector<Mat> New;
+		for (int i = 0; i < segments.size(); i++)
+		{
+			if (!segments[i].empty())
+			{
+				New.push_back(segments[i]);
+			}
+			if (New.size() == DES_SEG_QUANTITY)
+			{
+				break;
+			}
+		}
+		segments = New;
+	}
+
 	for (int i = 0; i < segments.size(); i++)
 	{
 		if (!segments[i].empty())
@@ -28,10 +45,6 @@ void CharRecognitionTool::init(vector<Mat> segments)
 	if (segments.size() < MIN_SEG_QUANTITY)
 	{
 		throw exception("Plate not found   :   too less segments for a number plate");
-	}
-	else if (segments.size() > DES_SEG_QUANTITY)
-	{
-		throw exception("Plate not found   :   too many segments for a number plate");
 	}
 	else if (clearSegQuantity == 0)
 	{
@@ -166,12 +179,19 @@ char CharRecognitionTool::next()
 
 void CharRecognitionTool::drawAll() 
 {
+//	char n = '1';
+//	string f = "E:/Projects/Number-Plate-Recognition/data/training-chars/t";
+//	string s = ".jpg";/////////////////////////////////////////////////////
+
 	Mat blunk(20, 20, CV_8UC1, Scalar(255));
 	for (int i = 0; i < mChars.size(); i++)
 	{
 		for (int j = 0; j < mChars[i].size(); j++)
 		{
 			Window::Draw((mChars[i][j].mSegment.empty()) ? blunk : mChars[i][j].mSegment);
+
+			//imwrite( f + n++ + s , mChars[i][j].mSegment);//////////////////////////////////////////
+
 			switch (mChars[i][j].mType)
 			{
 				case Segment::Undefined:

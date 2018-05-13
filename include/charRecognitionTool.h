@@ -30,7 +30,7 @@ private:
 	int mCurrChar = 0;
 	int mCharsQuantity = 0;
 
-	const int MIN_SEG_QUANTITY = 5;
+	const int MIN_SEG_QUANTITY = 4;
 	const int DES_SEG_QUANTITY = 8;
 
 public:

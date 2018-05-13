@@ -46,7 +46,6 @@ Mat* imgGetGray(Mat& img)
 {
 	Mat* result = new Mat(img.rows, img.cols, CV_8UC1);
 	uchar* in, *out;
-	uchar coef = 100;
 
 	for (int i = 0; i < img.rows; i++)
 	{
