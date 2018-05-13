@@ -17,10 +17,6 @@ NumberPlateRecognitionTool::~NumberPlateRecognitionTool()
 	{
 		delete mSource;
 	}
-	if (mCroppedPlate)
-	{
-		delete mCroppedPlate;
-	}
 }
 
 void NumberPlateRecognitionTool::tryRecognize(Mat& image)
@@ -30,10 +26,12 @@ void NumberPlateRecognitionTool::tryRecognize(Mat& image)
 	if (mSource)
 	{
 		delete mSource;
+		mSource = nullptr;
 	}
 	if (mCroppedPlate)
 	{
 		delete mCroppedPlate;
+		mCroppedPlate = nullptr;
 	}
 
 	mTime = (double)getTickCount();
