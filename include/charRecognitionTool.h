@@ -46,4 +46,8 @@ public:
 private:
 	char recognizeChar(Mat& segment, bool isNumber);
 	void skeletonize(Mat& segment);
+
+public://////////////////////////////////////////////////////////////////////
+	int getLoopQuantity(Mat segment);
+	vector<Point2f> getLEndsVec(Mat segment);
 };

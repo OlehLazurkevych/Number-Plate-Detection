@@ -181,7 +181,7 @@ void CharRecognitionTool::drawAll()
 {
 //	char n = '1';
 //	string f = "E:/Projects/Number-Plate-Recognition/data/training-chars/t";
-//	string s = ".jpg";/////////////////////////////////////////////////////
+//	string s = ".png";/////////////////////////////////////////////////////
 
 	Mat blunk(20, 20, CV_8UC1, Scalar(255));
 	for (int i = 0; i < mChars.size(); i++)
@@ -321,6 +321,108 @@ void CharRecognitionTool::skeletonize(Mat & segment)
 			}
 		}
 	}
+}
+
+int CharRecognitionTool::getLoopQuantity(Mat segment)
+{
+	const uchar CHCOLOR = 0;
+
+	const vector<Point> neighbourhood4Pos = vector<Point>{
+		Point(0, -1),  /*  Top     */
+		Point(1, 0),   /*  Right   */
+		Point(0, 1),   /*  Bottom  */
+		Point(-1, 0)   /*  Left    */
+	};
+	Point curr;
+	Point currPeek;
+
+	int loopQuantity = 0;
+	stack<Point> points;
+
+	for (int y = 0; y < segment.rows; y++)
+	{
+		for (int x = 0; x < segment.cols; x++)
+		{
+			curr = Point(x, y);
+			if (segment.at<uchar>(curr) != CHCOLOR)
+			{
+				points.push(curr);
+				while (!points.empty())
+				{
+					curr = points.top();
+					points.pop();
+					segment.at<uchar>(curr) = CHCOLOR;
+
+					for (int i = 0; i < neighbourhood4Pos.size(); i++)
+					{
+						currPeek = Point(curr.x + neighbourhood4Pos[i].x, curr.y + neighbourhood4Pos[i].y);
+						if (currPeek.x >= 0 && currPeek.x < segment.cols && currPeek.y >= 0 && currPeek.y < segment.rows)
+						{
+							if (segment.at<uchar>(currPeek) != CHCOLOR)
+							{
+								points.push(currPeek);
+							}
+						}
+					}
+				}
+				++loopQuantity;
+			}
+		}
+	}
+
+	return loopQuantity - 1;
+}
+
+vector<Point2f> CharRecognitionTool::getLEndsVec(Mat segment)
+{
+	const uchar CHCOLOR = 0;
+
+	const vector<Point> neighbourhood8Pos = vector<Point>{
+		Point(0, -1),  /*  Top            */
+		Point(1, -1),  /*  Top Right      */
+		Point(1, 0),   /*  Right          */
+		Point(1, 1),   /*  Bottom Right   */
+		Point(0, 1),   /*  Bottom         */
+		Point(-1, 1),  /*  Bottom Left    */
+		Point(-1, 0),  /*  Left           */
+		Point(-1, -1)  /*  Top Left       */
+	};
+	Point curr;
+	Point currPeek;
+
+	vector<Point2f> result;
+
+	int blackQuantity = 0;
+
+	for (int y = 0; y < segment.rows; y++)
+	{
+		for (int x = 0; x < segment.cols; x++)
+		{
+			curr = Point(x, y);
+			if (segment.at<uchar>(curr) == CHCOLOR)
+			{
+				blackQuantity = 0;
+				for (int i = 0; i < neighbourhood8Pos.size(); i++)
+				{
+					currPeek = Point(curr.x + neighbourhood8Pos[i].x, curr.y + neighbourhood8Pos[i].y);
+					if (currPeek.x >= 0 && currPeek.x < segment.cols && currPeek.y >= 0 && currPeek.y < segment.rows)
+					{
+						if (segment.at<uchar>(currPeek) == CHCOLOR)
+						{
+							++blackQuantity;
+						}
+					}
+				}
+
+				if (blackQuantity == 1)
+				{
+					result.push_back(Point2f((float)x / (float)segment.cols, (float)y / (float)segment.rows));
+				}
+			}
+		}
+	}
+
+	return result;
 }
 
 CharRecognitionTool::Segment::Segment() :
