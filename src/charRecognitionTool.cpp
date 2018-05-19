@@ -1,21 +1,55 @@
 #include "charRecognitionTool.h"
 
-CharRecognitionTool::CharRecognitionTool()
+CharRecognitionTool::CharRecognitionTool(const string numbersFeaturesFilePath, const string lettersFeaturesFilePath)
 {
-	// Empty
+	fstream numberFeaturesFileStream;
+	fstream letterFeaturesFileStream;
+
+	numberFeaturesFileStream.open(numbersFeaturesFilePath, ios::in);
+	if (!numberFeaturesFileStream)
+	{
+		numberFeaturesFileStream.close();
+		letterFeaturesFileStream.close();
+
+		throw new exception("Error   :   Could not open or find the numbers text file");
+	}
+	letterFeaturesFileStream.open(lettersFeaturesFilePath, ios::in);
+	if (!letterFeaturesFileStream)
+	{
+		numberFeaturesFileStream.close();
+		letterFeaturesFileStream.close();
+
+		throw new exception("Error   :   Could not open or find the letters text file");
+	}
+
+	while (!numberFeaturesFileStream.eof())
+	{
+		CharFeatures curr;
+		numberFeaturesFileStream >> curr;
+		mNumbersFeatures.push_back(curr);
+	}
+	while (!letterFeaturesFileStream.eof())
+	{
+		CharFeatures curr;
+		letterFeaturesFileStream >> curr;
+		mLettersFeatures.push_back(curr);
+	}
+
+	numberFeaturesFileStream.close();
+	letterFeaturesFileStream.close();
 }
 
-void CharRecognitionTool::init(vector<Mat> segments)
+void CharRecognitionTool::setSegments(vector<Mat> segments)
 {
 	uint clearSegQuantity = 0;
 
-	mChars[0].clear();
-	mChars[1].clear();
-	mChars[2].clear();
+	mSegments[0].clear();
+	mSegments[1].clear();
+	mSegments[2].clear();
 
 	mCurrBlock = 1;
 	mCurrChar = 0;
-	mCharsQuantity = 0;
+	mCharQuantity = 0;
 
 	if (segments.size() > DES_SEG_QUANTITY)
 	{
@@ -52,16 +86,16 @@ void CharRecognitionTool::init(vector<Mat> segments)
 	}
 	else if (segments.size() == DES_SEG_QUANTITY)
 	{
-		mChars[0].push_back(Segment(segments[0], Segment::Letter));
-		mChars[0].push_back(Segment(segments[1], Segment::Letter));
+		mSegments[0].push_back(Segment(segments[0], Segment::Letter));
+		mSegments[0].push_back(Segment(segments[1], Segment::Letter));
 
-		mChars[1].push_back(Segment(segments[2], Segment::Number));
-		mChars[1].push_back(Segment(segments[3], Segment::Number));
-		mChars[1].push_back(Segment(segments[4], Segment::Number));
-		mChars[1].push_back(Segment(segments[5], Segment::Number));
+		mSegments[1].push_back(Segment(segments[2], Segment::Number));
+		mSegments[1].push_back(Segment(segments[3], Segment::Number));
+		mSegments[1].push_back(Segment(segments[4], Segment::Number));
+		mSegments[1].push_back(Segment(segments[5], Segment::Number));
 
-		mChars[2].push_back(Segment(segments[6], Segment::Letter));
-		mChars[2].push_back(Segment(segments[7], Segment::Letter));
+		mSegments[2].push_back(Segment(segments[6], Segment::Letter));
+		mSegments[2].push_back(Segment(segments[7], Segment::Letter));
 	}
 	else if (segments.size() < DES_SEG_QUANTITY)
 	{
@@ -109,9 +143,9 @@ void CharRecognitionTool::init(vector<Mat> segments)
 		{
 			if (block == 0)
 			{
-				if ((segmentVec[i].mType == Segment::Letter || segmentVec[i].mType == Segment::Dirt) && mChars[block].size() < 2)
+				if ((segmentVec[i].mType == Segment::Letter || segmentVec[i].mType == Segment::Dirt) && mSegments[block].size() < 2)
 				{
-					mChars[block].push_back(segmentVec[i]);
+					mSegments[block].push_back(segmentVec[i]);
 				}
 				else
 				{
@@ -120,7 +154,7 @@ void CharRecognitionTool::init(vector<Mat> segments)
 			}
 			if (block == 1)
 			{
-				if (mChars[block].size() < 4)
+				if (mSegments[block].size() < 4)
 				{
 					if (segmentVec[i].mType == Segment::Letter || segmentVec[i].mType == Segment::Dirt)
 					{
@@ -134,12 +168,12 @@ void CharRecognitionTool::init(vector<Mat> segments)
 							{
 								segmentVec[i].mType = Segment::Number;
 							}
-							mChars[block].push_back(segmentVec[i]);
+							mSegments[block].push_back(segmentVec[i]);
 						}
 					}
 					else
 					{
-						mChars[block].push_back(segmentVec[i]);
+						mSegments[block].push_back(segmentVec[i]);
 					}
 				}
 				else
@@ -153,25 +187,22 @@ void CharRecognitionTool::init(vector<Mat> segments)
 				{
 					segmentVec[i].mType = Segment::Letter;
 				}
-				mChars[block].push_back(segmentVec[i]);
+				mSegments[block].push_back(segmentVec[i]);
 			}
 		}
 	}
 	
-	for (int i = 0; i < mChars.size(); i++)
+	for (int i = 0; i < mSegments.size(); i++)
 	{
-		mCharsQuantity += mChars[i].size();
+		mCharQuantity += mSegments[i].size();
 	}
 }
 
 char CharRecognitionTool::next()
 {
-	for (int i = 0; i < mChars.size(); i++)
+	for (int j = 0; j < mSegments[1].size(); j++)
 	{
-		for (int j = 0; j < mChars[i].size(); j++)
-		{
-			skeletonize(mChars[i][j].mSegment);
-		}
+		cout << recognizeChar(mSegments[1][j].mSegment, true);
 	}
 
 	return 0;
@@ -184,15 +215,15 @@ void CharRecognitionTool::drawAll()
 //	string s = ".png";/////////////////////////////////////////////////////
 
 	Mat blunk(20, 20, CV_8UC1, Scalar(255));
-	for (int i = 0; i < mChars.size(); i++)
+	for (int i = 0; i < mSegments.size(); i++)
 	{
-		for (int j = 0; j < mChars[i].size(); j++)
+		for (int j = 0; j < mSegments[i].size(); j++)
 		{
-			Window::Draw((mChars[i][j].mSegment.empty()) ? blunk : mChars[i][j].mSegment);
+			Window::Draw((mSegments[i][j].mSegment.empty()) ? blunk : mSegments[i][j].mSegment);
 
-			//imwrite( f + n++ + s , mChars[i][j].mSegment);//////////////////////////////////////////
+			//imwrite( f + n++ + s , mSegments[i][j].mSegment);//////////////////////////////////////////
 
-			switch (mChars[i][j].mType)
+			switch (mSegments[i][j].mType)
 			{
 				case Segment::Undefined:
 				{
@@ -219,17 +250,76 @@ void CharRecognitionTool::drawAll()
 	}
 }
 
-int CharRecognitionTool::getCharsQuantity() const
+int CharRecognitionTool::getCharQuantity() const
 {
-	return mCharsQuantity;
+	return mCharQuantity;
 }
 
-char CharRecognitionTool::recognizeChar(Mat & segment, bool isNumber)
+char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 {
-	return 0;
+	if (!segment.empty())
+	{
+		/* Segment sceletonization before feature extraction */
+		skeletonize(segment);
+
+		Window::Draw(segment);
+
+		/* Feature extraction */
+		vector<Point2f> lineEnds = getLEndsVec(segment);
+		int loopQuantity = getLoopQuantity(segment);
+		vector<CharFeatures> charset;
+		
+		/* Confident selection (by loop and line-ends quantity) */
+		if (isNumber)
+		{
+			for (int i = 0; i < mNumbersFeatures.size(); i++)
+			{
+				if (loopQuantity == mNumbersFeatures[i].mLoopQuantity && lineEnds.size() == mNumbersFeatures[i].mLineEnds.size())
+				{
+					charset.push_back(mNumbersFeatures[i]);
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < mLettersFeatures.size(); i++)
+			{
+				if (loopQuantity == mLettersFeatures[i].mLoopQuantity && lineEnds.size() == mLettersFeatures[i].mLineEnds.size())
+				{
+					charset.push_back(mLettersFeatures[i]);
+				}
+			}
+		}
+
+		if (charset.size() == 1)
+		{
+			return charset[0].mChar; // Confident result
+		}
+		else if (charset.size() > 1)
+		{
+			/* Complex analysis of line-ends */
+
+			char result = charset[0].mChar;
+			float min = getAllPointsDifference(charset[0].mLineEnds, lineEnds);
+			float curr;
+
+			for (int i = 1; i < charset.size(); i++)
+			{
+				curr = getAllPointsDifference(charset[i].mLineEnds, lineEnds);
+				if (curr < min)
+				{
+					min = curr;
+					result = charset[i].mChar;
+				}
+			}
+
+			return result; // The closest choise
+		}
+	}
+	return '*'; // Segment is empty
 }
 
-void CharRecognitionTool::skeletonize(Mat & segment)
+void CharRecognitionTool::skeletonize(Mat& segment)
 {
 	const uchar BGCOLOR = 255;
 	const uchar CHCOLOR = 0;
@@ -319,6 +409,40 @@ void CharRecognitionTool::skeletonize(Mat & segment)
 					iterate = true;
 				}
 			}
+		}
+	}
+
+	/* Push black boundary pixels from boundaries by one unit */
+	for (int x = 0; x < segment.cols; x++) // Top boundary
+	{
+		if (segment.at<uchar>(Point(x, 0)) == CHCOLOR)
+		{
+			segment.at<uchar>(Point(x, 0)) = BGCOLOR;
+			segment.at<uchar>(Point(x, 1)) = CHCOLOR;
+		}
+	}
+	for (int y = 0; y < segment.rows; y++) // Right boundary
+	{
+		if (segment.at<uchar>(Point(segment.cols - 1, y)) == CHCOLOR)
+		{
+			segment.at<uchar>(Point(segment.cols - 1, y)) = BGCOLOR;
+			segment.at<uchar>(Point(segment.cols - 2, y)) = CHCOLOR;
+		}
+	}
+	for (int x = 0; x < segment.cols; x++) // Bottom boundary
+	{
+		if (segment.at<uchar>(Point(x, segment.rows - 1)) == CHCOLOR)
+		{
+			segment.at<uchar>(Point(x, segment.rows - 1)) = BGCOLOR;
+			segment.at<uchar>(Point(x, segment.rows - 2)) = CHCOLOR;
+		}
+	}
+	for (int y = 0; y < segment.rows; y++) // Left boundary
+	{
+		if (segment.at<uchar>(Point(0, y)) == CHCOLOR)
+		{
+			segment.at<uchar>(Point(0, y)) = BGCOLOR;
+			segment.at<uchar>(Point(1, y)) = CHCOLOR;
 		}
 	}
 }
@@ -425,6 +549,49 @@ vector<Point2f> CharRecognitionTool::getLEndsVec(Mat segment)
 	return result;
 }
 
+float CharRecognitionTool::getAllPointsDifference(vector<Point2f> first, vector<Point2f> second)
+{
+	if (first.size() != second.size())
+	{
+		throw new exception("getAllPointsDifference()   :   vectors are not the same size");
+	}
+
+	float result = 0;
+	float min = 0;
+	float curr;
+	list<Point2f> container;
+
+	for (int i = 0; i < second.size(); i++)
+	{
+		container.push_back(second[i]);
+	}
+
+	list<Point2f>::iterator it = container.begin();
+	list<Point2f>::iterator minit = it;
+
+	for (int i = 0; i < first.size(); i++)
+	{
+		it = container.begin();
+		minit = it;
+		min = abs(first[i].x - it->x) + abs(first[i].y - it->y);
+
+		while (++it != container.end())
+		{
+			curr = abs(first[i].x - it->x) + abs(first[i].y - it->y);
+			if (curr < min)
+			{
+				min = curr;
+				minit = it;
+			}
+		}
+
+		result += min;
+		container.remove(*minit);
+	}
+
+	return result;
+}
+
 CharRecognitionTool::Segment::Segment() :
 	mSegment(Mat()),
 	mType(SegType::Undefined)
@@ -447,4 +614,9 @@ CharRecognitionTool::Segment::Segment(Mat segment, int type) :
 	mSegment(segment),
 	mType(type)
 {
+}
+
+CharRecognitionTool::CharFeatures::CharFeatures()
+{
+	// Empty
 }

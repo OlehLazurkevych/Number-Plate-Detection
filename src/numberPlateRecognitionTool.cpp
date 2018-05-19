@@ -1,10 +1,10 @@
 #include "numberPlateRecognitionTool.h"
 
-NumberPlateRecognitionTool::NumberPlateRecognitionTool()
+NumberPlateRecognitionTool::NumberPlateRecognitionTool(const string numbersFeaturesFilePath, const string lettersFeaturesFilePath)
 {
 	mPCT = new PlateCropTool();
 	mST = new SegmentationTool();
-	mCRT = new CharRecognitionTool();
+	mCRT = new CharRecognitionTool(numbersFeaturesFilePath, lettersFeaturesFilePath);
 }
 
 NumberPlateRecognitionTool::~NumberPlateRecognitionTool()
@@ -42,7 +42,7 @@ void NumberPlateRecognitionTool::tryRecognize(Mat& image)
 
 	try
 	{
-		mCRT->init(segments);
+		mCRT->setSegments(segments);
 		mCRT->next();
 	}
 	catch (exception e)
@@ -56,7 +56,7 @@ void NumberPlateRecognitionTool::tryRecognize(Mat& image)
 
 void NumberPlateRecognitionTool::showCashData(bool additionalData)
 {
-	cout << "Done in   :   " << mTime << " sec." << endl;
+	cout << endl << "Done in   :   " << mTime << " sec." << endl;
 
 	Window::Draw(*mSource);
 	Window::Draw(*mCroppedPlate);

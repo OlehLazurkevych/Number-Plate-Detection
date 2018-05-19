@@ -18,7 +18,7 @@ private:
 	double mTime;
 
 public:
-	NumberPlateRecognitionTool();
+	NumberPlateRecognitionTool(const string numbersFeaturesFilePath, const string lettersFeaturesFilePath);
 	~NumberPlateRecognitionTool();
 
 public:

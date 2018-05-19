@@ -22,26 +22,61 @@ private:
 		Segment(int type);
 		Segment(Mat segment, int type);
 	};
+	
+	class CharFeatures
+	{
+	public:
+		char mChar;
+		int mLoopQuantity;
+		vector<Point2f> mLineEnds;
+
+	public:
+		CharFeatures();
+
+		friend istream& operator>>(istream& stream, CharFeatures& data)
+		{
+			int size;
+			stream >> data.mChar >> data.mLoopQuantity >> size;
+			for (int i = 0; i < size; i++)
+			{
+				Point2f lineEnd;
+				stream >> lineEnd.x >> lineEnd.y;
+				data.mLineEnds.push_back(lineEnd);
+			}
+			return stream;
+		}
+		friend ostream& operator<<(ostream& stream, const CharFeatures& data)
+		{
+			stream << data.mChar << endl << data.mLoopQuantity << endl << data.mLineEnds.size();
+			for (int i = 0; i < data.mLineEnds.size(); i++)
+			{
+				stream << data.mLineEnds[i].x << ' ' << data.mLineEnds[i].y << endl;
+			}
+			return stream;
+		}
+	};
 
 private:
-	vector<vector<Segment>> mChars = vector<vector<Segment>>{ vector<Segment>(), vector<Segment>(), vector<Segment>() };
+	vector<vector<Segment>> mSegments = vector<vector<Segment>>{ vector<Segment>(), vector<Segment>(), vector<Segment>() };
+	vector<CharFeatures> mNumbersFeatures;
+	vector<CharFeatures> mLettersFeatures;
 
 	int mCurrBlock = 1;
 	int mCurrChar = 0;
-	int mCharsQuantity = 0;
+	int mCharQuantity = 0;
 
-	const int MIN_SEG_QUANTITY = 4;
+	const int MIN_SEG_QUANTITY = 4;////////////////////////////////////////////5
 	const int DES_SEG_QUANTITY = 8;
 
 public:
-	CharRecognitionTool();
+	CharRecognitionTool(const string numbersFeaturesFilePath, const string lettersFeaturesFilePath);
 
 public:
-	void init(vector<Mat> segments);
+	void setSegments(vector<Mat> segments);
 	char next();
 	void drawAll();
 
-	int getCharsQuantity() const;
+	int getCharQuantity() const;
 
 private:
 	char recognizeChar(Mat& segment, bool isNumber);
@@ -50,4 +85,5 @@ private:
 public://////////////////////////////////////////////////////////////////////
 	int getLoopQuantity(Mat segment);
 	vector<Point2f> getLEndsVec(Mat segment);
+	float getAllPointsDifference(vector<Point2f> first, vector<Point2f> secound);
 };
