@@ -27,7 +27,9 @@ vector<Point2f> Train(string path, int quantity)
 		if (!image.empty())
 		{
 			image = *imgLocalThresh(image, 0, 0);
-			vector<Point2f> temp = test.getLEndsVec(image);
+
+			//vector<Point2f> temp = test.getLEndsVec(image);
+			vector<Point2f> temp = test.getJunctionsVec(image);
 
 			if (res.empty())
 			{
@@ -100,22 +102,17 @@ vector<Point2f> Train(string path, int quantity)
 
 int main(int argc, char** argv)
 {
-	Mat image = imread("E:/Projects/Number-Plate-Recognition/data/photo-of-cars/dirty/3.jpg");
-	//image = *imgLocalThresh(image, 0, 0);
+	Mat image = imread("E:/Projects/Number-Plate-Recognition/data/photo-of-cars/1.jpg");
 	NumberPlateRecognitionTool NPRT("E:/Projects/Number-Plate-Recognition/data/char-features/f-numbers.txt",
 									"E:/Projects/Number-Plate-Recognition/data/char-features/f-letters.txt");
-	//CharRecognitionTool test;
+	
 
-	//Window::Draw(image);
-
-	/*vector<Point2f> res = Train("E:/Projects/Number-Plate-Recognition/data/training-chars/9/", 13);
-
+	/*vector<Point2f> res = Train("E:/Projects/Number-Plate-Recognition/data/training-chars/H/", 4);
 	for (int i = 0; i < res.size(); i++)
 	{
 		cout << res[i].x << "  " << res[i].y << endl;
 	}*/
 
-	//cout << test.getLoopQuantity(image) << endl;
 
 	if (image.empty())
 	{

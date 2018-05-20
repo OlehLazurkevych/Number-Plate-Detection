@@ -200,15 +200,23 @@ void CharRecognitionTool::setSegments(vector<Mat> segments)
 
 char CharRecognitionTool::next()
 {
+	for (int j = 0; j < mSegments[0].size(); j++)
+	{
+		cout << recognizeChar(mSegments[0][j].mSegment, false);
+	}
 	for (int j = 0; j < mSegments[1].size(); j++)
 	{
 		cout << recognizeChar(mSegments[1][j].mSegment, true);
+	}
+	for (int j = 0; j < mSegments[2].size(); j++)
+	{
+		cout << recognizeChar(mSegments[2][j].mSegment, false);
 	}
 
 	return 0;
 }
 
-void CharRecognitionTool::drawAll() 
+void CharRecognitionTool::drawAll()
 {
 //	char n = '1';
 //	string f = "E:/Projects/Number-Plate-Recognition/data/training-chars/t";
@@ -219,7 +227,7 @@ void CharRecognitionTool::drawAll()
 	{
 		for (int j = 0; j < mSegments[i].size(); j++)
 		{
-			Window::Draw((mSegments[i][j].mSegment.empty()) ? blunk : mSegments[i][j].mSegment);
+			//Window::Draw((mSegments[i][j].mSegment.empty()) ? blunk : mSegments[i][j].mSegment);
 
 			//imwrite( f + n++ + s , mSegments[i][j].mSegment);//////////////////////////////////////////
 
@@ -262,10 +270,9 @@ char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 		/* Segment sceletonization before feature extraction */
 		skeletonize(segment);
 
-		Window::Draw(segment);
-
 		/* Feature extraction */
 		vector<Point2f> lineEnds = getLEndsVec(segment);
+		vector<Point2f> junctions = getJunctionsVec(segment);
 		int loopQuantity = getLoopQuantity(segment);
 		vector<CharFeatures> charset;
 		
@@ -297,19 +304,41 @@ char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 		}
 		else if (charset.size() > 1)
 		{
-			/* Complex analysis of line-ends */
-
-			char result = charset[0].mChar;
-			float min = getAllPointsDifference(charset[0].mLineEnds, lineEnds);
-			float curr;
-
-			for (int i = 1; i < charset.size(); i++)
+			char result;
+			if (!isNumber && lineEnds.size() == 4)
 			{
-				curr = getAllPointsDifference(charset[i].mLineEnds, lineEnds);
-				if (curr < min)
+				/* Complex analysis of junctions */
+
+				result = charset[0].mChar;
+				float min = getAllPointsDifference(charset[0].mJunctions, junctions);
+				float curr;
+
+				for (int i = 1; i < charset.size(); i++)
 				{
-					min = curr;
-					result = charset[i].mChar;
+					curr = getAllPointsDifference(charset[i].mJunctions, junctions);
+					if (curr < min)
+					{
+						min = curr;
+						result = charset[i].mChar;
+					}
+				}
+			}
+			else
+			{
+				/* Complex analysis of line-ends */
+
+				result = charset[0].mChar;
+				float min = getAllPointsDifference(charset[0].mLineEnds, lineEnds);
+				float curr;
+
+				for (int i = 1; i < charset.size(); i++)
+				{
+					curr = getAllPointsDifference(charset[i].mLineEnds, lineEnds);
+					if (curr < min)
+					{
+						min = curr;
+						result = charset[i].mChar;
+					}
 				}
 			}
 
@@ -539,6 +568,67 @@ vector<Point2f> CharRecognitionTool::getLEndsVec(Mat segment)
 				}
 
 				if (blackQuantity == 1)
+				{
+					result.push_back(Point2f((float)x / (float)segment.cols, (float)y / (float)segment.rows));
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+vector<Point2f> CharRecognitionTool::getJunctionsVec(Mat segment)
+{
+	const uchar CHCOLOR = 0;
+	const uchar BGCOLOR = 255;
+	
+	const vector<Point> neighbourhood8Pos = vector<Point>{
+		Point(0, -1),  /*  Top            */
+		Point(1, -1),  /*  Top Right      */
+		Point(1, 0),   /*  Right          */
+		Point(1, 1),   /*  Bottom Right   */
+		Point(0, 1),   /*  Bottom         */
+		Point(-1, 1),  /*  Bottom Left    */
+		Point(-1, 0),  /*  Left           */
+		Point(-1, -1)  /*  Top Left       */
+	};
+	Point curr;
+	Point currPeek;
+
+	vector<Point2f> result;
+	uchar first, previous;
+
+	int whiteToBlack = 0;
+
+	for (int y = 0; y < segment.rows; y++)
+	{
+		for (int x = 0; x < segment.cols; x++)
+		{
+			curr = Point(x, y);
+			if (segment.at<uchar>(curr) == CHCOLOR)
+			{
+				whiteToBlack = 0;
+
+				first = segment.at<uchar>(Point(curr.x + neighbourhood8Pos[0].x, curr.y + neighbourhood8Pos[0].y));
+				previous = first;
+
+				for (int i = 1; i < neighbourhood8Pos.size(); i++)
+				{
+					currPeek = Point(curr.x + neighbourhood8Pos[i].x, curr.y + neighbourhood8Pos[i].y);
+					if (previous == BGCOLOR && segment.at<uchar>(currPeek) == CHCOLOR)
+					{
+						++whiteToBlack;
+					}
+					previous = segment.at<uchar>(currPeek);
+				}
+
+				if (previous == BGCOLOR && first == CHCOLOR)
+				{
+					++whiteToBlack;
+				}
+
+				if (whiteToBlack > 2)
 				{
 					result.push_back(Point2f((float)x / (float)segment.cols, (float)y / (float)segment.rows));
 				}

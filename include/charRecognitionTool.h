@@ -29,19 +29,28 @@ private:
 		char mChar;
 		int mLoopQuantity;
 		vector<Point2f> mLineEnds;
+		vector<Point2f> mJunctions;
 
 	public:
 		CharFeatures();
 
 		friend istream& operator>>(istream& stream, CharFeatures& data)
 		{
-			int size;
-			stream >> data.mChar >> data.mLoopQuantity >> size;
-			for (int i = 0; i < size; i++)
+			int sizeLA;
+			int sizeJA;
+			stream >> data.mChar >> data.mLoopQuantity >> sizeLA;
+			for (int i = 0; i < sizeLA; i++)
 			{
 				Point2f lineEnd;
 				stream >> lineEnd.x >> lineEnd.y;
 				data.mLineEnds.push_back(lineEnd);
+			}
+			stream >> sizeJA;
+			for (int i = 0; i < sizeJA; i++)
+			{
+				Point2f junction;
+				stream >> junction.x >> junction.y;
+				data.mJunctions.push_back(junction);
 			}
 			return stream;
 		}
@@ -51,6 +60,11 @@ private:
 			for (int i = 0; i < data.mLineEnds.size(); i++)
 			{
 				stream << data.mLineEnds[i].x << ' ' << data.mLineEnds[i].y << endl;
+			}
+			stream << data.mJunctions.size() << endl;
+			for (int i = 0; i < data.mJunctions.size(); i++)
+			{
+				stream << data.mJunctions[i].x << ' ' << data.mJunctions[i].y << endl;
 			}
 			return stream;
 		}
@@ -85,5 +99,6 @@ private:
 public://////////////////////////////////////////////////////////////////////
 	int getLoopQuantity(Mat segment);
 	vector<Point2f> getLEndsVec(Mat segment);
+	vector<Point2f> getJunctionsVec(Mat segment);
 	float getAllPointsDifference(vector<Point2f> first, vector<Point2f> secound);
 };
