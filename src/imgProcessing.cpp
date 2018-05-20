@@ -130,3 +130,27 @@ Mat* imgLocalThresh(Mat& img, const int widthSegments, const int heightSegments)
 
 	return result;
 }
+
+Mat* imgDeskew(Mat& img, Point left, Point right, int height)
+{
+	Mat* result = new Mat(height, img.cols, CV_8UC1, Scalar(255));
+	double m = ((double)right.y - (double)left.y) / ((double)right.x - (double)left.x);
+	double x2 = (double)right.x;
+	double y2 = (double)right.y;
+	int ay;
+
+	for (int x = 0; x < img.cols; x++)
+	{
+		ay = m * ((double)x - x2) + y2;
+
+		if (ay < img.rows && ay >= 0)
+		{
+			for (int y = ay, j = 0; y < ay + height && y < img.rows; y++, j++)
+			{
+				result->at<uchar>(Point(x, j)) = img.at<uchar>(Point(x, y));
+			}
+		}
+	}
+
+	return result;
+}

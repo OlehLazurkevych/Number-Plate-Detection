@@ -14,3 +14,4 @@ Mat* imgFilter(const Mat& img, const Mat& filterMat);
 Mat* imgCrop(const int x, const int y, const int width, const int height, Mat& img);
 Mat* imgGetGray(Mat& img);
 Mat* imgLocalThresh(Mat& img, const int xSegments, const int ySegments);
+Mat* imgDeskew(Mat& img, Point left, Point right, int height);

@@ -102,11 +102,10 @@ vector<Point2f> Train(string path, int quantity)
 
 int main(int argc, char** argv)
 {
-	Mat image = imread("E:/Projects/Number-Plate-Recognition/data/photo-of-cars/1.jpg");
+	Mat image = imread("E:/Projects/Number-Plate-Recognition/data/photo-of-cars/14.jpg");
 	NumberPlateRecognitionTool NPRT("E:/Projects/Number-Plate-Recognition/data/char-features/f-numbers.txt",
 									"E:/Projects/Number-Plate-Recognition/data/char-features/f-letters.txt");
 	
-
 	/*vector<Point2f> res = Train("E:/Projects/Number-Plate-Recognition/data/training-chars/H/", 4);
 	for (int i = 0; i < res.size(); i++)
 	{
