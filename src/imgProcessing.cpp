@@ -19,7 +19,7 @@ Mat* imgFilter(const Mat& img, const Mat& filterMat)
     return result;
 }
 
-Mat * imgCrop(const int x, const int y, const int width, const int height, Mat& img)
+Mat* imgCrop(const int x, const int y, const int width, const int height, Mat& img)
 {
 	Mat* result = nullptr;
 
@@ -133,19 +133,51 @@ Mat* imgLocalThresh(Mat& img, const int widthSegments, const int heightSegments)
 
 Mat* imgDeskew(Mat& img, Point left, Point right, int height)
 {
-	Mat* result = new Mat(height, img.cols, CV_8UC1, Scalar(255));
-	double m = ((double)right.y - (double)left.y) / ((double)right.x - (double)left.x);
-	double x2 = (double)right.x;
-	double y2 = (double)right.y;
-	int ay;
+	int midColor = 0;
 
-	for (int x = 0; x < img.cols; x++)
+	for (int y = 0; y < img.rows; y++)
 	{
-		ay = m * ((double)x - x2) + y2;
-
-		if (ay < img.rows && ay >= 0)
+		for (int x = 0; x < img.cols; x++)
 		{
-			for (int y = ay, j = 0; y < ay + height && y < img.rows; y++, j++)
+			midColor += img.at<uchar>(Point(x, y));
+		}
+	}
+
+	midColor /= (img.cols * img.rows);
+
+	Mat* result = new Mat(height, img.cols, CV_8UC1, Scalar((uchar)midColor));
+	if (left.y != right.y)
+	{
+		double m = ((double)right.y - (double)left.y) / ((double)right.x - (double)left.x);
+		double x2 = (double)right.x;
+		double y2 = (double)right.y;
+		int ay;
+
+		for (int x = 0; x < img.cols; x++)
+		{
+			ay = m * ((double)x - x2) + y2;
+
+			if (ay < img.rows && ay >= 0)
+			{
+				for (int y = ay, j = 0; y < ay + height && y < img.rows; y++, j++)
+				{
+					result->at<uchar>(Point(x, j)) = img.at<uchar>(Point(x, y));
+				}
+			}
+			else if (ay < 0)
+			{
+				for (int y = 0; y < height && y < img.rows; y++)
+				{
+					result->at<uchar>(Point(x, y)) = img.at<uchar>(Point(x, y));
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int x = 0; x < img.cols; x++)
+		{
+			for (int y = left.y, j = 0; y < left.y + height && y < img.rows; y++, j++)
 			{
 				result->at<uchar>(Point(x, j)) = img.at<uchar>(Point(x, y));
 			}

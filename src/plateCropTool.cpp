@@ -54,7 +54,7 @@ void PlateCropTool::firstPhase()
 			{
 				delete subProjection;
 			}
-
+			
 			fill(verticalProj->begin() + clipBoundaries.first, verticalProj->begin() + clipBoundaries.second, 0);
 		}
 		else
@@ -95,6 +95,7 @@ void PlateCropTool::secoundPhase()
 		if (mPotentialPlates[i].mPlate != nullptr)
 		{
 			filtered = imgFilter(*mPotentialPlates[i].mPlate, horizontalDetectionMat);
+
 			roughtHorizontalProj = imgProjection(*filtered, true);
 			horizontalProj = vecRankFilter(*roughtHorizontalProj, mPotentialPlates[i].mPlate->rows * HORIZONTAL_RANK_COEF);
 
@@ -124,7 +125,6 @@ void PlateCropTool::secoundPhase()
 				}
 				mPotentialPlates[i].mPlate = inswapping;
 			}
-			
 			if (filtered)
 			{
 				delete filtered;

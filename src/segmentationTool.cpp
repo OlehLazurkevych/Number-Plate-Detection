@@ -8,6 +8,7 @@ SegmentationTool::SegmentationTool()
 vector<Mat> SegmentationTool::getSegments(Mat& image)
 {
 	mSegments.clear();
+	//deskew(image);
 	cutSegments(image);
 	removeTrash();
 	return mSegments;
@@ -17,6 +18,7 @@ void SegmentationTool::cutSegments(Mat& image)
 {
 	Mat* source = imgLocalThresh(image, 3, 2);
 	Mat curr;
+	Point glPosP;
 
 	for (int x = 0; x < source->cols; x++)
 	{
@@ -24,12 +26,10 @@ void SegmentationTool::cutSegments(Mat& image)
 		{
 			if (source->at<uchar>(Point(x, y)) == 0)
 			{
-				curr = extractParticle(*source, x, y);
+				curr = extractParticle(*source, x, y, glPosP);
 				if (!curr.empty())
 				{
-					// TODO: when angeling
-					// cut image by height of particles
-					if (curr.rows * 2.4 > source->rows)
+					if (curr.rows * SEGMENT_HIGHT_CONSTANT > source->rows)
 					{
 						if (curr.cols > curr.rows)
 						{
@@ -51,7 +51,7 @@ void SegmentationTool::cutSegments(Mat& image)
 	}
 }
 
-Mat SegmentationTool::extractParticle(Mat& segment, const int seedX, const int seedY)
+Mat SegmentationTool::extractParticle(Mat& segment, const int seedX, const int seedY, Point& globalTopLeft)
 {
 	const uchar BGCOLOR = 255;
 	const uchar CHCOLOR = 0;
@@ -121,6 +121,8 @@ Mat SegmentationTool::extractParticle(Mat& segment, const int seedX, const int s
 		}
 	}
 	
+	globalTopLeft = Point(minX, minY);
+
 	Mat* cropped = imgCrop(minX, minY, maxX - minX + 1, maxY - minY + 1, result);
 	if (cropped)
 	{
@@ -194,5 +196,55 @@ void SegmentationTool::removeTrash()
 			result.push_back(mSegments[i]);
 		}
 		mSegments = result;
+	}
+}
+
+void SegmentationTool::deskew(Mat& image)
+{
+	Mat* localThresh = imgLocalThresh(image, 3, 2);
+	pair<Point, Point> points;
+	int charHeight = 0;
+	Mat curr;
+	int count = 0;
+	uchar CHCOLOR = 0; // Black pixel of posible character
+	Point glPosPoint;
+
+	for (int x = 0; x < localThresh->cols; x++)
+	{
+		for (int y = 0; y < localThresh->rows; y++)
+		{
+			if (localThresh->at<uchar>(Point(x, y)) == CHCOLOR)
+			{
+				curr = extractParticle(*localThresh, x, y, glPosPoint);
+				if (!curr.empty())
+				{
+					if (curr.rows * SEGMENT_HIGHT_CONSTANT > localThresh->rows && curr.cols < curr.rows && curr.cols * 2 > curr.rows)
+					{
+						Window::Draw(curr);
+						if (count == 1)
+						{
+							points.first = glPosPoint;
+							charHeight = curr.rows + 1;
+						}
+						else if(count != 0 && count < 6)
+						{
+							points.second = glPosPoint;
+						}
+						count++;
+					}
+				}
+			}
+		}
+	}
+
+	if (charHeight > 0)
+	{
+		Window::Draw(image);
+		image = *imgDeskew(image, points.first, points.second, charHeight);
+	}
+
+	if (localThresh)
+	{
+		delete localThresh;
 	}
 }

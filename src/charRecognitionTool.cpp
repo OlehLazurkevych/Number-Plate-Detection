@@ -200,14 +200,17 @@ void CharRecognitionTool::setSegments(vector<Mat> segments)
 
 char CharRecognitionTool::next()
 {
+	cout << " ";
 	for (int j = 0; j < mSegments[0].size(); j++)
 	{
 		cout << recognizeChar(mSegments[0][j].mSegment, false);
 	}
+	cout << " ";
 	for (int j = 0; j < mSegments[1].size(); j++)
 	{
 		cout << recognizeChar(mSegments[1][j].mSegment, true);
 	}
+	cout << " ";
 	for (int j = 0; j < mSegments[2].size(); j++)
 	{
 		cout << recognizeChar(mSegments[2][j].mSegment, false);
