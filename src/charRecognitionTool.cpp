@@ -198,25 +198,35 @@ void CharRecognitionTool::setSegments(vector<Mat> segments)
 	}
 }
 
-char CharRecognitionTool::next()
+string CharRecognitionTool::next()
 {
-	cout << " ";
-	for (int j = 0; j < mSegments[0].size(); j++)
+	string result = "";
+	
+	if (mCurrBlock == 0)
 	{
-		cout << recognizeChar(mSegments[0][j].mSegment, false);
+		for (int j = 0; j < mSegments[0].size(); j++)
+		{
+			result += recognizeChar(mSegments[0][j].mSegment, false);
+		}
 	}
-	cout << " ";
-	for (int j = 0; j < mSegments[1].size(); j++)
+	else if (mCurrBlock == 1)
 	{
-		cout << recognizeChar(mSegments[1][j].mSegment, true);
+		for (int j = 0; j < mSegments[1].size(); j++)
+		{
+			result += recognizeChar(mSegments[1][j].mSegment, true);
+		}
+		mCurrBlock = 2;
 	}
-	cout << " ";
-	for (int j = 0; j < mSegments[2].size(); j++)
+	else if (mCurrBlock == 2)
 	{
-		cout << recognizeChar(mSegments[2][j].mSegment, false);
+		for (int j = 0; j < mSegments[2].size(); j++)
+		{
+			result += recognizeChar(mSegments[2][j].mSegment, false);
+		}
+		mCurrBlock = 0;
 	}
 
-	return 0;
+	return result;
 }
 
 void CharRecognitionTool::drawAll()
@@ -266,7 +276,7 @@ int CharRecognitionTool::getCharQuantity() const
 	return mCharQuantity;
 }
 
-char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
+string CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 {
 	if (!segment.empty())
 	{
@@ -303,16 +313,19 @@ char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 
 		if (charset.size() == 1)
 		{
-			return charset[0].mChar; // Confident result
+			string ex = "";
+			ex += charset[0].mChar;
+			return ex; // Confident result
 		}
 		else if (charset.size() > 1)
 		{
-			char result;
+			string result = "";
 			if (!isNumber && lineEnds.size() == 4)
 			{
 				/* Complex analysis of junctions */
 
-				result = charset[0].mChar;
+				result = "";
+				result += charset[0].mChar;
 				float min = getAllPointsDifference(charset[0].mJunctions, junctions);
 				float curr;
 
@@ -322,7 +335,8 @@ char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 					if (curr < min)
 					{
 						min = curr;
-						result = charset[i].mChar;
+						result = "";
+						result += charset[i].mChar;
 					}
 				}
 			}
@@ -330,7 +344,8 @@ char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 			{
 				/* Complex analysis of line-ends */
 
-				result = charset[0].mChar;
+				result = "";
+				result += charset[0].mChar;
 				float min = getAllPointsDifference(charset[0].mLineEnds, lineEnds);
 				float curr;
 
@@ -340,7 +355,8 @@ char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 					if (curr < min)
 					{
 						min = curr;
-						result = charset[i].mChar;
+						result = "";
+						result += charset[i].mChar;
 					}
 				}
 			}
@@ -348,7 +364,7 @@ char CharRecognitionTool::recognizeChar(Mat& segment, bool isNumber)
 			return result; // The closest choise
 		}
 	}
-	return '*'; // Segment is empty
+	return "(.*)"; // Segment is empty
 }
 
 void CharRecognitionTool::skeletonize(Mat& segment)

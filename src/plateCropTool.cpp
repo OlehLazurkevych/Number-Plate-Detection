@@ -26,8 +26,11 @@ Mat* PlateCropTool::getPlate(Mat& image)
 	firstPhase();
 	secoundPhase();
 	thirdPhase();
+	int index = choosePlateIndex();
 
-	return mPotentialPlates[choosePlateIndex()].mPlate;
+	imwrite("plate.jpg", *mPotentialPlates[index].mPlate);
+
+	return mPotentialPlates[index].mPlate;
 }
 
 void PlateCropTool::firstPhase()

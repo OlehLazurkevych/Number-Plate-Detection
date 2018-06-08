@@ -1,8 +1,6 @@
 ﻿#include "openCV.h"
 #include "numberPlateRecognitionTool.h"
 
-
-
 vector<Point2f> Train(string path, int quantity)
 {
 	CharRecognitionTool test("", "");
@@ -98,11 +96,9 @@ vector<Point2f> Train(string path, int quantity)
 	return res;
 }
 
-
-
 int main(int argc, char** argv)
 {
-	Mat image = imread("E:/Projects/Number-Plate-Recognition/data/photo-of-cars/12.jpg");
+	Mat image = imread(/*"E:/Projects/Number-Plate-Recognition/data/photo-of-cars/1.jpg"*/argv[1]);
 	NumberPlateRecognitionTool NPRT("E:/Projects/Number-Plate-Recognition/data/char-features/f-numbers.txt",
 									"E:/Projects/Number-Plate-Recognition/data/char-features/f-letters.txt");
 	
@@ -115,7 +111,7 @@ int main(int argc, char** argv)
 
 	if (image.empty())
 	{
-		cout << "Error   :   Could not open or find the image file" << endl;
+		cout << "Error   :   Could not open or find the image file: " << argv[1] << endl;
 	}
 	else
 	{
@@ -131,7 +127,7 @@ int main(int argc, char** argv)
 		NPRT.showCashData();
 	}
 
-	waitKey(0);
-	system("pause");
+	/*waitKey(0);
+	system("pause");*/
 	return 0;
 }

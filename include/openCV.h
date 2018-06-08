@@ -11,6 +11,7 @@
 #include <list>
 #include <numeric>
 #include <exception>
+#include <regex>
 
 using namespace cv;
 using namespace std;

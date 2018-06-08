@@ -7,10 +7,29 @@
 
 class NumberPlateRecognitionTool
 {
+private: 
+class CarData
+{
+public:
+	string Number = "";
+	string Owner = "";
+	string Mark = "";
+	string Id = "";
+
+	CarData() {}
+	CarData(string number, string owner, string mark, string id): Number(number), Owner(owner), Mark(mark), Id(id) {}
+
+	friend ostream& operator<<(ostream& out, CarData& obj)
+	{
+		return out << "Number: " << obj.Number << " Owner: " << obj.Owner << " Mark: " << obj.Mark << " Id: " << obj.Id;
+	}
+};
 private:
 	PlateCropTool*         mPCT;
 	SegmentationTool*      mST;
 	CharRecognitionTool*   mCRT;
+
+	vector<CarData> mDB;
 
 	/* Cash data */
 	Mat* mSource;

@@ -79,7 +79,7 @@ private:
 	int mCurrChar = 0;
 	int mCharQuantity = 0;
 
-	const int MIN_SEG_QUANTITY = 4;////////////////////////////////////////////5
+	const int MIN_SEG_QUANTITY = 4;// 5 danger value
 	const int DES_SEG_QUANTITY = 8;
 
 public:
@@ -87,13 +87,13 @@ public:
 
 public:
 	void setSegments(vector<Mat> segments);
-	char next();
+	string next();
 	void drawAll();
 
 	int getCharQuantity() const;
 
 private:
-	char recognizeChar(Mat& segment, bool isNumber);
+	string recognizeChar(Mat& segment, bool isNumber);
 	void skeletonize(Mat& segment);
 
 public://////////////////////////////////////////////////////////////////////
